@@ -27,7 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus, UserPlus, Shield, User as UserIcon, Loader2 } from 'lucide-react';
+import { Plus, UserPlus, Shield, User as UserIcon, Loader2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function UserManagementPage() {

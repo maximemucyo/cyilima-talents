@@ -9,13 +9,15 @@ export async function GET() {
     await dbConnect();
     
     const [jobs, candidates, screenings] = await Promise.all([
-      Job.countDocuments(),
-      Candidate.countDocuments(),
-      Screening.countDocuments(),
+      Job.countDocuments({ isDeleted: { $ne: true } }),
+      Candidate.countDocuments({ isDeleted: { $ne: true } }),
+      Screening.countDocuments({ isDeleted: { $ne: true } }),
     ]);
 
-    // For shortlists, let's assume it's screenings with completed status or specific field
-    const shortlists = await Screening.countDocuments({ status: 'completed' });
+    const shortlists = await Screening.countDocuments({ 
+        status: 'completed',
+        isDeleted: { $ne: true }
+    });
 
     return NextResponse.json({
       success: true,
