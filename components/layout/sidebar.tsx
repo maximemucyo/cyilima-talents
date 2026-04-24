@@ -95,8 +95,8 @@ export function Sidebar() {
         {/* Logo */}
         <div className="h-16 flex items-center justify-center border-b border-sidebar-border">
           <Link href="/" className="flex items-center gap-2 px-4">
-            <div className="w-8 h-8 bg-sidebar-primary rounded-lg flex items-center justify-center">
-              <Zap className="h-5 w-5 text-sidebar-primary-foreground" />
+            <div className="w-8 h-8 flex items-center justify-center overflow-hidden rounded-lg">
+              <img src="/logo.png" alt="Cyilima Talents Logo" className="w-full h-full object-contain" />
             </div>
             <span className="font-bold text-lg text-sidebar-foreground">Cyilima Talents</span>
           </Link>
