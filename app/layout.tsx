@@ -10,8 +10,8 @@ export const metadata: Metadata = {
   title: 'Cyilima Talents',
   description: 'Streamlined talent management and AI-powered candidate screening.',
   icons: {
-    icon: '/logo.png',
-    apple: '/logo.png',
+    icon: '/brand-logo.png',
+    apple: '/brand-logo.png',
   },
 }
 
@@ -30,7 +30,7 @@ export default function RootLayout({
           {children}
           <Toaster position="top-right" />
         </AuthProvider>
-        {process.env.NODE_ENV === 'production' && <Analytics />}
+        <Analytics />
       </body>
     </html>
   )
