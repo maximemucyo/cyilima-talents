@@ -72,7 +72,7 @@ export const jobsApi = {
 
   update: (id: string, data: unknown) =>
     apiCall(`/jobs/${id}`, {
-      method: 'PUT',
+      method: 'PATCH',
       body: JSON.stringify(data),
     }),
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -170,17 +170,23 @@ export function JobForm({ initialData, isEditing }: JobFormProps) {
               <Label htmlFor="employmentType" className="text-foreground">
                 Employment Type *
               </Label>
-              <Select {...register('employmentType')}>
-                <SelectTrigger id="employmentType" className="mt-2 bg-muted border-border">
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent className="bg-card border-border">
-                  <SelectItem value="full-time">Full Time</SelectItem>
-                  <SelectItem value="part-time">Part Time</SelectItem>
-                  <SelectItem value="contract">Contract</SelectItem>
-                  <SelectItem value="temporary">Temporary</SelectItem>
-                </SelectContent>
-              </Select>
+              <Controller
+                name="employmentType"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger id="employmentType" className="mt-2 bg-muted border-border">
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-card border-border">
+                      <SelectItem value="full-time">Full Time</SelectItem>
+                      <SelectItem value="part-time">Part Time</SelectItem>
+                      <SelectItem value="contract">Contract</SelectItem>
+                      <SelectItem value="temporary">Temporary</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
               {errors.employmentType && (
                 <span className="text-xs text-destructive mt-1">{errors.employmentType.message}</span>
               )}
@@ -190,17 +196,23 @@ export function JobForm({ initialData, isEditing }: JobFormProps) {
               <Label htmlFor="seniority" className="text-foreground">
                 Seniority Level *
               </Label>
-              <Select {...register('seniority')}>
-                <SelectTrigger id="seniority" className="mt-2 bg-muted border-border">
-                  <SelectValue placeholder="Select level" />
-                </SelectTrigger>
-                <SelectContent className="bg-card border-border">
-                  <SelectItem value="entry">Entry Level</SelectItem>
-                  <SelectItem value="mid">Mid Level</SelectItem>
-                  <SelectItem value="senior">Senior</SelectItem>
-                  <SelectItem value="lead">Lead</SelectItem>
-                </SelectContent>
-              </Select>
+              <Controller
+                name="seniority"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger id="seniority" className="mt-2 bg-muted border-border">
+                      <SelectValue placeholder="Select level" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-card border-border">
+                      <SelectItem value="entry">Entry Level</SelectItem>
+                      <SelectItem value="mid">Mid Level</SelectItem>
+                      <SelectItem value="senior">Senior</SelectItem>
+                      <SelectItem value="lead">Lead</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
               {errors.seniority && (
                 <span className="text-xs text-destructive mt-1">{errors.seniority.message}</span>
               )}
@@ -211,22 +223,34 @@ export function JobForm({ initialData, isEditing }: JobFormProps) {
           <div className="space-y-3 p-4 bg-muted/30 rounded-lg border border-border">
             <p className="text-sm font-medium text-foreground mb-3">Recruitment Scope</p>
             <div className="flex items-center gap-3">
-              <Checkbox
-                id="isRwandaFocused"
-                defaultChecked={true}
-                {...register('isRwandaFocused')}
-                className="border-border"
+              <Controller
+                name="isRwandaFocused"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox
+                    id="isRwandaFocused"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    className="border-border"
+                  />
+                )}
               />
               <Label htmlFor="isRwandaFocused" className="text-foreground cursor-pointer font-normal">
                 Focus on Rwanda-based candidates (recommended)
               </Label>
             </div>
             <div className="flex items-center gap-3">
-              <Checkbox
-                id="acceptInternational"
-                defaultChecked={true}
-                {...register('acceptInternational')}
-                className="border-border"
+              <Controller
+                name="acceptInternational"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox
+                    id="acceptInternational"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    className="border-border"
+                  />
+                )}
               />
               <Label htmlFor="acceptInternational" className="text-foreground cursor-pointer font-normal">
                 Accept international applications

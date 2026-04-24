@@ -15,7 +15,12 @@ export async function GET(
       return NextResponse.json({ error: 'Job not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, data: job });
+    const mapped = {
+        ...job.toObject(),
+        id: job._id.toString()
+    };
+
+    return NextResponse.json({ success: true, data: mapped });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }

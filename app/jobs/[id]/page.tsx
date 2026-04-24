@@ -95,7 +95,7 @@ export default function JobDetailPage() {
                   {job.department || 'General'}
                 </Badge>
                 <Badge variant="secondary" className="bg-accent/10 text-accent border-0">
-                  {job.type || 'Full-time'}
+                  {job.employmentType || 'Full-time'}
                 </Badge>
                 <div className="flex items-center text-sm text-muted-foreground gap-1 ml-2">
                   <MapPin className="h-4 w-4" />
