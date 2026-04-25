@@ -38,9 +38,11 @@ Return ONLY valid JSON.
 `;
 
   try {
+    console.log(`Gemini: Parsing resume text (${resumeText.length} chars)`);
     const result = await ai.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" }).generateContent(prompt);
     const response = await result.response;
     let rawText = response.text() || "{}";
+    console.log(`Gemini: Received response (${rawText.length} chars)`);
     rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
     return JSON.parse(rawText);
   } catch (error) {
@@ -91,9 +93,11 @@ Rules:
 `;
 
   try {
+    console.log(`Gemini: Screening ${candidates.length} candidates against job: ${job.title}`);
     const result = await ai.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" }).generateContent(prompt);
     const response = await result.response;
     let rawText = response.text() || "[]";
+    console.log(`Gemini: Received response (${rawText.length} chars)`);
     rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
     return JSON.parse(rawText);
   } catch (error) {

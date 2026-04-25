@@ -221,16 +221,16 @@ export function BulkUploadComponent({ onSuccess }: BulkUploadProps) {
               <div className="flex-1">
                 <h3 className="font-semibold text-foreground mb-1">Upload Successful</h3>
                 <p className="text-sm text-muted-foreground mb-3">
-                  {uploadResult.data?.uploadedCount} candidates uploaded successfully
-                  {uploadResult.data?.failedCount ? ` (${uploadResult.data.failedCount} failed)` : ''}
+                  {uploadResult.data?.inserted || uploadResult.data?.uploadedCount || 0} candidates processed
+                  {uploadResult.data?.errors?.length ? ` (${uploadResult.data.errors.length} failed)` : ''}
                 </p>
                 {uploadResult.data?.errors && uploadResult.data.errors.length > 0 && (
                   <div className="bg-muted/50 rounded p-3 mb-3">
-                    <p className="text-xs font-medium text-muted-foreground mb-2">Errors:</p>
+                    <p className="text-xs font-medium text-muted-foreground mb-2">Details:</p>
                     <ul className="text-xs text-destructive space-y-1">
-                      {uploadResult.data.errors.slice(0, 5).map((err, i) => (
+                      {uploadResult.data.errors.slice(0, 10).map((err: any, i: number) => (
                         <li key={i}>
-                          Row {err.row}: {err.error}
+                          {err.url || `Row ${err.row}`}: {err.error}
                         </li>
                       ))}
                     </ul>
