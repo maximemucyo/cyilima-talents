@@ -3,8 +3,8 @@
  */
 export async function extractTextFromPDF(buffer: Buffer): Promise<string> {
     try {
-        console.log('Loading pdfjs-dist...');
-        const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+        console.log('Loading pdfjs-dist (legacy v3)...');
+        const pdfjs = await import('pdfjs-dist/legacy/build/pdf.js');
         
         const data = new Uint8Array(buffer);
         console.log(`Buffer size: ${data.length} bytes`);
