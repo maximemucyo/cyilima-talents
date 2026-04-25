@@ -13,7 +13,8 @@ export async function extractTextFromPDF(buffer: Buffer): Promise<string> {
             data,
             useWorkerFetch: false,
             isEvalSupported: false,
-            useSystemFonts: true
+            useSystemFonts: true,
+            disableWorker: true // Force fake worker in Node environment
         });
 
         const pdf = await loadingTask.promise;
