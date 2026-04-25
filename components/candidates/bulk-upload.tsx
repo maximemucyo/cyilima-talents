@@ -42,7 +42,7 @@ export function BulkUploadComponent({ onSuccess }: BulkUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeTab, setActiveTab] = useState('csv');
   const [isDragging, setIsDragging] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadResult, setUploadResult] = useState<UploadResponse | null>(null);
@@ -76,9 +76,8 @@ export function BulkUploadComponent({ onSuccess }: BulkUploadProps) {
     e.stopPropagation();
     setIsDragging(false);
 
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-      const selectedFile = files[0];
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    if (droppedFiles.length > 0) {
       const validTypes = [
         'text/csv',
         'application/json',
@@ -89,19 +88,22 @@ export function BulkUploadComponent({ onSuccess }: BulkUploadProps) {
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       ];
 
-      if (validTypes.includes(selectedFile.type) || selectedFile.name.match(/\.(csv|json|pdf|zip|xls|xlsx)$/i)) {
-        setFile(selectedFile);
+      const newFiles = droppedFiles.filter(f => 
+        validTypes.includes(f.type) || f.name.match(/\.(csv|json|pdf|zip|xls|xlsx)$/i)
+      );
+
+      if (newFiles.length > 0) {
+        setFiles(prev => [...prev, ...newFiles]);
         setError(null);
       } else {
-        setError(`Unsupported format: ${selectedFile.type}. Supported: ${supportedFormats.join(', ')}`);
+        setError(`Supported formats: ${supportedFormats.join(', ')}`);
       }
     }
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.currentTarget.files;
-    if (files?.length) {
-      const selectedFile = files[0];
+    const selectedFiles = Array.from(e.currentTarget.files || []);
+    if (selectedFiles.length) {
       const validTypes = [
         'text/csv',
         'application/json',
@@ -112,17 +114,25 @@ export function BulkUploadComponent({ onSuccess }: BulkUploadProps) {
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       ];
 
-      if (validTypes.includes(selectedFile.type) || selectedFile.name.match(/\.(csv|json|pdf|zip|xls|xlsx)$/i)) {
-        setFile(selectedFile);
+      const newFiles = selectedFiles.filter(f => 
+        validTypes.includes(f.type) || f.name.match(/\.(csv|json|pdf|zip|xls|xlsx)$/i)
+      );
+
+      if (newFiles.length > 0) {
+        setFiles(prev => [...prev, ...newFiles]);
         setError(null);
       } else {
-        setError(`Unsupported format. Supported: ${supportedFormats.join(', ')}`);
+        setError(`Supported formats: ${supportedFormats.join(', ')}`);
       }
     }
   };
 
+  const removeFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleUpload = async () => {
-    if (!file) return;
+    if (files.length === 0) return;
 
     setIsUploading(true);
     setError(null);
@@ -130,10 +140,17 @@ export function BulkUploadComponent({ onSuccess }: BulkUploadProps) {
 
     try {
       const progressInterval = setInterval(() => {
-        setUploadProgress((prev) => (prev < 90 ? prev + 10 : 90));
-      }, 200);
+        setUploadProgress((prev) => (prev < 90 ? prev + 5 : 90));
+      }, 500);
 
-      const response = await candidatesApi.bulkUpload(file);
+      // Create FormData with all files
+      const formData = new FormData();
+      files.forEach(f => formData.append('file', f));
+
+      const response = await fetch('/api/candidates/bulk-upload', {
+        method: 'POST',
+        body: formData,
+      }).then(res => res.json());
 
       clearInterval(progressInterval);
       setUploadProgress(100);
@@ -201,7 +218,7 @@ export function BulkUploadComponent({ onSuccess }: BulkUploadProps) {
   };
 
   const handleReset = () => {
-    setFile(null);
+    setFiles([]);
     setUploadProgress(0);
     setUploadResult(null);
     setError(null);
@@ -301,36 +318,54 @@ export function BulkUploadComponent({ onSuccess }: BulkUploadProps) {
               <input
                 ref={fileInputRef}
                 type="file"
+                multiple
                 accept=".csv,.json,.pdf,.zip,.xls,.xlsx"
                 onChange={handleFileSelect}
                 className="hidden"
                 disabled={isUploading}
               />
 
-              {file ? (
-                <div className="space-y-3">
-                  <FileText className="h-8 w-8 text-accent mx-auto" />
-                  <div>
-                    <p className="font-medium text-foreground">{file.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {(file.size / 1024 / 1024).toFixed(2)} MB
-                    </p>
+              {files.length > 0 ? (
+                <div className="space-y-4">
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {files.map((f, i) => (
+                      <div 
+                        key={i} 
+                        className="bg-accent/20 border border-accent/30 rounded-md px-3 py-2 flex items-center gap-2 group relative animate-in fade-in slide-in-from-bottom-1"
+                      >
+                        <FileText className="h-4 w-4 text-accent" />
+                        <div className="text-left">
+                          <p className="text-xs font-medium text-foreground truncate max-w-[120px]">{f.name}</p>
+                          <p className="text-[10px] text-muted-foreground">{(f.size / 1024).toFixed(0)} KB</p>
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeFile(i);
+                          }}
+                          className="text-muted-foreground hover:text-destructive p-0.5"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
+                  <p className="text-xs text-muted-foreground">Click or drop more files to add</p>
                 </div>
               ) : (
                 <div className="space-y-2">
                   <Upload className="h-8 w-8 text-accent mx-auto" />
                   <div>
-                    <p className="font-medium text-foreground">Drop your file here or click</p>
+                    <p className="font-medium text-foreground">Drop your files here or click</p>
                     <p className="text-sm text-muted-foreground">
-                      CSV, JSON, Excel, PDF, or ZIP (max 50MB)
+                      CSV, JSON, Excel, PDF, or ZIP (Multiple supported)
                     </p>
                   </div>
                 </div>
               )}
             </div>
 
-            {!file && (
+            {files.length === 0 && (
               <div className="bg-muted/30 rounded-lg p-4">
                 <p className="text-sm font-medium text-foreground mb-3">Expected CSV Format:</p>
                 <code className="text-xs text-muted-foreground block whitespace-pre-wrap bg-background p-3 rounded border border-border overflow-x-auto">
@@ -354,20 +389,20 @@ Jane,Smith,jane@example.com,+9876543210,Kampala,"Python,Django,PostgreSQL",7,Tec
             <div className="flex gap-3">
               <Button
                 onClick={handleUpload}
-                disabled={!file || isUploading}
+                disabled={files.length === 0 || isUploading}
                 className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground gap-2 disabled:opacity-50"
               >
                 {isUploading && <Loader2 className="h-4 w-4 animate-spin" />}
-                {isUploading ? 'Uploading...' : 'Upload File'}
+                {isUploading ? `Processing ${files.length} Files...` : `Upload ${files.length || ''} Files`}
               </Button>
 
-              {file && !isUploading && (
+              {files.length > 0 && !isUploading && (
                 <Button
                   onClick={handleReset}
                   variant="outline"
                   className="border-border text-foreground hover:bg-muted"
                 >
-                  Clear
+                  Clear All
                 </Button>
               )}
             </div>
