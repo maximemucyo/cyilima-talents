@@ -38,15 +38,9 @@ Return ONLY valid JSON.
 `;
 
   try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.1-flash-lite-preview',
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-      }
-    });
-
-    let rawText = response.text || "{}";
+    const result = await ai.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" }).generateContent(prompt);
+    const response = await result.response;
+    let rawText = response.text() || "{}";
     rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
     return JSON.parse(rawText);
   } catch (error) {
@@ -97,15 +91,9 @@ Rules:
 `;
 
   try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.1-flash-lite-preview',
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-      }
-    });
-
-    let rawText = response.text || "[]";
+    const result = await ai.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" }).generateContent(prompt);
+    const response = await result.response;
+    let rawText = response.text() || "[]";
     rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
     return JSON.parse(rawText);
   } catch (error) {

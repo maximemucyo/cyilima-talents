@@ -2,15 +2,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Candidate from '@/lib/models/Candidate';
 import { parseResumeToProfile } from '@/lib/services/ai-service';
-import * as pdfParse from 'pdf-parse';
-import path from 'path';
-import { pathToFileURL } from 'url';
 
-const { PDFParse } = pdfParse;
-
-// Set the worker for pdfjs-dist using a local file URL
-const workerPath = path.resolve('node_modules/pdfjs-dist/build/pdf.worker.mjs');
-PDFParse.setWorker(pathToFileURL(workerPath).toString());
 
 export async function POST(request: Request) {
   try {
@@ -26,8 +18,8 @@ export async function POST(request: Request) {
     
     if (file.type === 'application/pdf') {
        const buffer = Buffer.from(await file.arrayBuffer());
-       const parser = new PDFParse({ data: buffer });
-       const pdfData = await parser.getText();
+       const pdf = (await import('pdf-parse')).default;
+       const pdfData = await pdf(buffer);
        parsedText = pdfData.text;
     } else {
        parsedText = await file.text();
