@@ -44,7 +44,7 @@ Return ONLY valid JSON.
       contents: prompt
     });
     const response = result;
-    let rawText = response.text() || "{}";
+    let rawText = response.text || "{}";
     console.log(`Gemini: Received response (${rawText.length} chars)`);
     rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
     return JSON.parse(rawText);
@@ -102,7 +102,7 @@ Rules:
       contents: prompt
     });
     const response = result;
-    let rawText = response.text() || "[]";
+    let rawText = response.text || "[]";
     console.log(`Gemini: Received response (${rawText.length} chars)`);
     rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
     return JSON.parse(rawText);
