@@ -1,29 +1,93 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Candidate from '@/lib/models/Candidate';
+import { parseResumeToProfile } from '@/lib/services/ai-service';
+import { extractTextFromPDF } from '@/lib/utils/pdf-utils';
+
+export const maxDuration = 60;
+export const dynamic = 'force-dynamic';
+
+function transformUrl(url: string): string {
+    const driveMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (driveMatch && driveMatch[1]) {
+        return `https://drive.google.com/uc?export=download&id=${driveMatch[1]}`;
+    }
+    return url;
+}
 
 export async function POST(request: Request) {
   try {
     await dbConnect();
-    const { urls } = await request.json();
+    const body = await request.json();
+    const urls = body.urls || body.cvUrls || body.linkedinUrls;
 
     if (!urls || urls.length === 0) {
       return NextResponse.json({ success: false, error: 'URLs are required' }, { status: 400 });
     }
 
-    // MVP dummy mapping for URL uploads - In production, this would fetch from URL, parse PDF, and send to Gemini.
     const newCandidates = await Promise.all(urls.map(async (url: string) => {
-        return await Candidate.create({
-            firstName: "Imported",
-            lastName: "From URL",
-            email: `imported-${Date.now()}@example.com`,
-            cvUrl: url,
-            skills: [],
-        });
+        try {
+            const isLinkedIn = url.includes('linkedin.com');
+            const downloadUrl = transformUrl(url);
+            let parsedText = '';
+            let profile: any = {
+                firstName: "Imported",
+                lastName: "From URL",
+                email: `imported-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`,
+                cvUrl: url,
+                socialLinks: isLinkedIn ? { linkedin: url } : {}
+            };
+
+            if (!isLinkedIn) {
+                console.log(`Fetching from: ${downloadUrl}`);
+                const res = await fetch(downloadUrl, {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                    }
+                });
+                
+                if (res.ok) {
+                    const contentType = res.headers.get('content-type');
+                    const buffer = Buffer.from(await res.arrayBuffer());
+                    
+                    if (contentType?.includes('pdf') || url.toLowerCase().endsWith('.pdf')) {
+                        parsedText = await extractTextFromPDF(buffer);
+                    } else {
+                        parsedText = buffer.toString('utf-8');
+                    }
+                }
+            } else {
+                const parts = url.split('/').filter(Boolean);
+                const lastPart = parts[parts.length - 1];
+                if (lastPart) {
+                    profile.firstName = lastPart.split('-')[0] || "LinkedIn";
+                    profile.lastName = "User";
+                }
+            }
+
+            if (parsedText) {
+                const aiProfile = await parseResumeToProfile(parsedText);
+                profile = { ...profile, ...aiProfile };
+            }
+
+            return await Candidate.create(profile);
+        } catch (err) {
+            console.error(`Error processing URL ${url}:`, err);
+            return null;
+        }
     }));
 
-    return NextResponse.json({ success: true, data: { inserted: newCandidates.length, candidates: newCandidates } }, { status: 201 });
+    const successfulCandidates = newCandidates.filter(c => c !== null);
+
+    return NextResponse.json({ 
+        success: true, 
+        data: { 
+            inserted: successfulCandidates.length, 
+            candidates: successfulCandidates 
+        } 
+    }, { status: 201 });
   } catch (error: any) {
+    console.error('Bulk URL Error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

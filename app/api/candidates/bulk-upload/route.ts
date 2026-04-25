@@ -8,35 +8,49 @@ export async function POST(request: Request) {
   try {
     await dbConnect();
     const formData = await request.formData();
-    const file = formData.get('file') as File;
+    const files = formData.getAll('file') as File[];
     
-    if (!file) {
-      return NextResponse.json({ success: false, error: 'No file uploaded' }, { status: 400 });
+    if (!files || files.length === 0) {
+      return NextResponse.json({ success: false, error: 'No files uploaded' }, { status: 400 });
     }
 
-    let parsedText = '';
-    
-    if (file.type === 'application/pdf') {
-       const buffer = Buffer.from(await file.arrayBuffer());
-       parsedText = await extractTextFromPDF(buffer);
-    } else {
-       parsedText = await file.text();
-       // If CSV/JSON and too large, we might just bypass Gemini, but for hackathon MVP we let AI extract it.
-    }
+    const results = await Promise.all(files.map(async (file) => {
+      try {
+        let parsedText = '';
+        
+        if (file.type === 'application/pdf') {
+           const buffer = Buffer.from(await file.arrayBuffer());
+           parsedText = await extractTextFromPDF(buffer);
+        } else {
+           parsedText = await file.text();
+        }
 
-    // 1) Process text through Gemini LLM to map to structured Schema
-    const profile = await parseResumeToProfile(parsedText);
+        // 1) Process text through Gemini LLM to map to structured Schema
+        const profile = await parseResumeToProfile(parsedText);
+        
+        // 2) Save to DB
+        const candidateData = {
+            ...profile,
+            cvText: parsedText,
+            cvUrl: file.name
+        };
+        
+        return await Candidate.create(candidateData);
+      } catch (err) {
+        console.error(`Error processing file ${file.name}:`, err);
+        return null;
+      }
+    }));
+
+    const successfulCandidates = results.filter(c => c !== null);
     
-    // 2) Save to DB
-    const candidateData = {
-        ...profile,
-        cvText: parsedText,
-        cvUrl: file.name
-    };
-    
-    const candidate = await Candidate.create(candidateData);
-    
-    return NextResponse.json({ success: true, data: { inserted: 1, candidates: [candidate] } }, { status: 201 });
+    return NextResponse.json({ 
+        success: true, 
+        data: { 
+            inserted: successfulCandidates.length, 
+            candidates: successfulCandidates 
+        } 
+    }, { status: 201 });
   } catch (error: any) {
     console.error('Upload Error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
