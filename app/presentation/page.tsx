@@ -115,7 +115,7 @@ export default function PresentationPage() {
             </div>
 
             <div className="flex items-center justify-between mt-20 pt-8 border-t border-white/5">
-              <span className="text-sm text-gray-500 font-mono">
+              <h2 className="text-sm text-gray-500 font-mono">
                 {slides[currentSlide].footer}
               </h2>
               <div className="flex gap-4">
