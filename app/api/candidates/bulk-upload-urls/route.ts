@@ -25,7 +25,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'URLs are required' }, { status: 400 });
     }
 
-    const newCandidates = await Promise.all(urls.map(async (url: string) => {
+    const results = await Promise.all(urls.map(async (url: string) => {
         try {
             const isLinkedIn = url.includes('linkedin.com');
             const downloadUrl = transformUrl(url);
@@ -55,6 +55,8 @@ export async function POST(request: Request) {
                     } else {
                         parsedText = buffer.toString('utf-8');
                     }
+                } else {
+                    throw new Error(`Failed to fetch URL: ${res.status} ${res.statusText}`);
                 }
             } else {
                 const parts = url.split('/').filter(Boolean);
@@ -70,20 +72,23 @@ export async function POST(request: Request) {
                 profile = { ...profile, ...aiProfile };
             }
 
-            return await Candidate.create(profile);
-        } catch (err) {
+            const candidate = await Candidate.create(profile);
+            return { success: true, candidate };
+        } catch (err: any) {
             console.error(`Error processing URL ${url}:`, err);
-            return null;
+            return { success: false, url, error: err.message };
         }
     }));
 
-    const successfulCandidates = newCandidates.filter(c => c !== null);
+    const successfulCandidates = results.filter(r => r.success).map(r => r.candidate);
+    const failedUrls = results.filter(r => !r.success);
 
     return NextResponse.json({ 
         success: true, 
         data: { 
             inserted: successfulCandidates.length, 
-            candidates: successfulCandidates 
+            candidates: successfulCandidates,
+            errors: failedUrls
         } 
     }, { status: 201 });
   } catch (error: any) {
