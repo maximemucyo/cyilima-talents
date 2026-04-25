@@ -15,12 +15,12 @@ Cyilima Talents is a state-of-the-art recruitment and talent management platform
 
 ```mermaid
 graph TD
-    A[Recruiter] --> B[Next.js App Router]
-    B --> C[API Route Handlers]
-    C --> D[PDF Extraction - pdfjs-dist]
-    D --> E[Gemini AI Service]
-    E --> F[Structured JSON Mapping]
-    F --> G[MongoDB Atlas]
+    A["Recruiter"] --> B["Next.js App Router"]
+    B --> C["API Route Handlers"]
+    C --> D["PDF Extraction (pdfjs-dist)"]
+    D --> E["Gemini AI Service"]
+    E --> F["Structured JSON Mapping"]
+    F --> G["MongoDB Atlas"]
     G --> B
 ```
 
