@@ -18,11 +18,15 @@ export async function POST(request: Request) {
       try {
         let parsedText = '';
         
-        if (file.type === 'application/pdf') {
+        if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
            const buffer = Buffer.from(await file.arrayBuffer());
            parsedText = await extractTextFromPDF(buffer);
         } else {
            parsedText = await file.text();
+        }
+
+        if (!parsedText || parsedText.trim().length === 0) {
+            throw new Error('No text content extracted from file');
         }
 
         // 1) Process text through Gemini LLM to map to structured Schema
@@ -35,20 +39,23 @@ export async function POST(request: Request) {
             cvUrl: file.name
         };
         
-        return await Candidate.create(candidateData);
-      } catch (err) {
+        const candidate = await Candidate.create(candidateData);
+        return { success: true, candidate };
+      } catch (err: any) {
         console.error(`Error processing file ${file.name}:`, err);
-        return null;
+        return { success: false, fileName: file.name, error: err.message };
       }
     }));
 
-    const successfulCandidates = results.filter(c => c !== null);
+    const successfulCandidates = results.filter(r => r.success).map(r => r.candidate);
+    const failedFiles = results.filter(r => !r.success);
     
     return NextResponse.json({ 
         success: true, 
         data: { 
             inserted: successfulCandidates.length, 
-            candidates: successfulCandidates 
+            candidates: successfulCandidates,
+            errors: failedFiles 
         } 
     }, { status: 201 });
   } catch (error: any) {
