@@ -309,7 +309,7 @@ export function BulkUploadComponent({ onSuccess }: BulkUploadProps) {
               className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
                 isDragging
                   ? 'border-accent bg-accent/10'
-                  : file
+                  : files.length > 0
                   ? 'border-green-500/30 bg-green-500/10'
                   : 'border-border hover:border-accent/50'
               }`}
