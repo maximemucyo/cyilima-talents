@@ -1,9 +1,10 @@
-import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
-
 /**
  * Extracts text from a PDF buffer using pdfjs-dist legacy build (Node compatible)
  */
 export async function extractTextFromPDF(buffer: Buffer): Promise<string> {
+    // Dynamic import to avoid build errors with pdfjs-dist in Turbopack/Next.js
+    const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+    
     const data = new Uint8Array(buffer);
     const loadingTask = pdfjs.getDocument({
         data,
