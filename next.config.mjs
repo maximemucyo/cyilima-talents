@@ -12,13 +12,6 @@ const nextConfig = {
     }
     return config;
   },
-  experimental: {
-    turbo: {
-      resolveAlias: {
-        canvas: './lib/utils/mock-canvas.js',
-      },
-    },
-  },
 }
 
 export default nextConfig

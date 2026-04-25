@@ -5,6 +5,9 @@ export async function extractTextFromPDF(buffer: Buffer): Promise<string> {
     try {
         console.log('Loading pdfjs-dist (legacy v3)...');
         const pdfjs = await import('pdfjs-dist/legacy/build/pdf.js');
+        // Explicitly set the worker to avoid "Cannot find module './pdf.worker.js'"
+        const pdfWorker = await import('pdfjs-dist/legacy/build/pdf.worker.js');
+        pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
         
         const data = new Uint8Array(buffer);
         console.log(`Buffer size: ${data.length} bytes`);
