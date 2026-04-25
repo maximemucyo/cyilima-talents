@@ -18,6 +18,8 @@ import {
 
 import { useSession, signOut } from 'next-auth/react';
 
+import Link from 'next/link';
+
 export function Header() {
   const { data: session } = useSession();
   
@@ -37,10 +39,30 @@ export function Header() {
       {/* Actions */}
       <div className="flex items-center gap-4 ml-6">
         {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5 text-foreground" />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full" />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="relative text-foreground hover:bg-muted">
+              <Bell className="h-5 w-5" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-80 bg-card border-border">
+            <div className="px-4 py-2 border-b border-border">
+              <h3 className="font-semibold text-foreground">Notifications</h3>
+            </div>
+            <div className="max-h-64 overflow-y-auto">
+              <div className="p-4 text-sm text-muted-foreground text-center">
+                No new notifications
+              </div>
+            </div>
+            <DropdownMenuSeparator className="bg-border" />
+            <div className="p-2 text-center">
+              <Button variant="ghost" size="sm" className="text-xs text-primary w-full">
+                View all notifications
+              </Button>
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         {/* User Menu */}
         <DropdownMenu>
@@ -58,16 +80,22 @@ export function Header() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56 bg-card border-border">
-            <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                {session?.user?.email}
+            <div className="px-4 py-3 border-b border-border">
+                <p className="text-sm font-medium text-foreground">{session?.user?.name}</p>
+                <p className="text-xs text-muted-foreground truncate">{session?.user?.email}</p>
             </div>
-            <DropdownMenuItem className="text-foreground cursor-pointer">
-              <User className="h-4 w-4 mr-2" />
-              <span>Profile Settings</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="text-foreground cursor-pointer">
-              <span>Account Settings</span>
-            </DropdownMenuItem>
+            <Link href="/settings">
+              <DropdownMenuItem className="text-foreground cursor-pointer">
+                <User className="h-4 w-4 mr-2" />
+                <span>Profile Settings</span>
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/settings">
+              <DropdownMenuItem className="text-foreground cursor-pointer">
+                <Settings className="h-4 w-4 mr-2" />
+                <span>Account Settings</span>
+              </DropdownMenuItem>
+            </Link>
             <DropdownMenuSeparator className="bg-border" />
             <DropdownMenuItem 
               className="text-destructive cursor-pointer"

@@ -15,8 +15,17 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Settings, User, Bell, Lock } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 
 export default function SettingsPage() {
+  const { data: session } = useSession();
+  
+  // Split name if possible
+  const fullName = session?.user?.name || 'Admin User';
+  const nameParts = fullName.split(' ');
+  const firstName = nameParts[0] || 'Admin';
+  const lastName = nameParts.slice(1).join(' ') || 'User';
+
   return (
     <MainLayout>
       <div className="p-6 space-y-6">
@@ -73,7 +82,7 @@ export default function SettingsPage() {
                     </Label>
                     <Input
                       id="firstName"
-                      defaultValue="Admin"
+                      defaultValue={firstName}
                       className="mt-2 bg-muted border-border text-foreground"
                     />
                   </div>
@@ -83,7 +92,7 @@ export default function SettingsPage() {
                     </Label>
                     <Input
                       id="lastName"
-                      defaultValue="User"
+                      defaultValue={lastName}
                       className="mt-2 bg-muted border-border text-foreground"
                     />
                   </div>
@@ -96,7 +105,7 @@ export default function SettingsPage() {
                   <Input
                     id="email"
                     type="email"
-                    defaultValue="admin@cyilimatalents.com"
+                    defaultValue={session?.user?.email || 'admin@cyilimatalents.com'}
                     className="mt-2 bg-muted border-border text-foreground"
                   />
                 </div>
@@ -107,7 +116,7 @@ export default function SettingsPage() {
                   </Label>
                   <Input
                     id="company"
-                    defaultValue="Your Company"
+                    defaultValue="Cyilima Team"
                     className="mt-2 bg-muted border-border text-foreground"
                   />
                 </div>
