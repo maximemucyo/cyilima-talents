@@ -12,6 +12,7 @@ const nextConfig = {
     }
     return config;
   },
+  turbopack: {}, // Satisfy Next.js 16 check
 }
 
 export default nextConfig
