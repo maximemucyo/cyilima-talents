@@ -8,6 +8,7 @@ export default auth((req) => {
   const isOnDashboard = req.nextUrl.pathname.startsWith("/") && 
                        !req.nextUrl.pathname.startsWith("/login") && 
                        !req.nextUrl.pathname.startsWith("/register") &&
+                       !req.nextUrl.pathname.startsWith("/presentation") &&
                        !req.nextUrl.pathname.startsWith("/api")
 
   if (isOnDashboard) {
