@@ -21,6 +21,7 @@ import {
   File as FileIcon,
   Grid3x3,
 } from 'lucide-react';
+import JSZip from 'jszip';
 
 interface UploadResponse {
   success: boolean;
@@ -54,6 +55,39 @@ export function BulkUploadComponent({ onSuccess }: BulkUploadProps) {
 
   const supportedFormats = ['CSV', 'JSON', 'Excel (XLS/XLSX)', 'PDF', 'ZIP'];
 
+  const expandZipFiles = async (file: File): Promise<File[]> => {
+    if (!file.name.toLowerCase().endsWith('.zip')) return [file];
+    
+    try {
+      const zip = new JSZip();
+      const contents = await zip.loadAsync(file);
+      const expandedFiles: File[] = [];
+      
+      for (const [path, entry] of Object.entries(contents.files)) {
+        if (entry.dir) continue;
+        
+        // Skip hidden files like __MACOSX
+        if (path.includes('__MACOSX') || path.split('/').some(p => p.startsWith('.'))) continue;
+        
+        const blob = await entry.async('blob');
+        const fileName = path.split('/').pop() || path;
+        
+        // Try to determine mime type from extension
+        let type = '';
+        if (fileName.toLowerCase().endsWith('.pdf')) type = 'application/pdf';
+        else if (fileName.toLowerCase().endsWith('.csv')) type = 'text/csv';
+        else if (fileName.toLowerCase().endsWith('.json')) type = 'application/json';
+        
+        expandedFiles.push(new File([blob], fileName, { type }));
+      }
+      
+      return expandedFiles;
+    } catch (err) {
+      console.error('Error expanding ZIP:', err);
+      return [file]; // Fallback to original file
+    }
+  };
+
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -71,7 +105,7 @@ export function BulkUploadComponent({ onSuccess }: BulkUploadProps) {
     e.stopPropagation();
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
@@ -88,7 +122,17 @@ export function BulkUploadComponent({ onSuccess }: BulkUploadProps) {
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       ];
 
-      const newFiles = droppedFiles.filter(f => 
+      let allFiles: File[] = [];
+      for (const f of droppedFiles) {
+        if (f.name.toLowerCase().endsWith('.zip')) {
+          const expanded = await expandZipFiles(f);
+          allFiles = [...allFiles, ...expanded];
+        } else {
+          allFiles.push(f);
+        }
+      }
+
+      const newFiles = allFiles.filter(f => 
         validTypes.includes(f.type) || f.name.match(/\.(csv|json|pdf|zip|xls|xlsx)$/i)
       );
 
@@ -101,7 +145,7 @@ export function BulkUploadComponent({ onSuccess }: BulkUploadProps) {
     }
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.currentTarget.files || []);
     if (selectedFiles.length) {
       const validTypes = [
@@ -114,7 +158,17 @@ export function BulkUploadComponent({ onSuccess }: BulkUploadProps) {
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       ];
 
-      const newFiles = selectedFiles.filter(f => 
+      let allFiles: File[] = [];
+      for (const f of selectedFiles) {
+        if (f.name.toLowerCase().endsWith('.zip')) {
+          const expanded = await expandZipFiles(f);
+          allFiles = [...allFiles, ...expanded];
+        } else {
+          allFiles.push(f);
+        }
+      }
+
+      const newFiles = allFiles.filter(f => 
         validTypes.includes(f.type) || f.name.match(/\.(csv|json|pdf|zip|xls|xlsx)$/i)
       );
 
