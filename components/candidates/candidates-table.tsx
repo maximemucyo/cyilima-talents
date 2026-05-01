@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,9 +43,35 @@ interface Candidate {
 interface CandidatesTableProps {
   candidates: Candidate[];
   onDelete?: (id: string) => void;
+  selectedIds?: string[];
+  onSelectionChange?: (ids: string[]) => void;
+  onSkillClick?: (skill: string) => void;
 }
 
-export function CandidatesTable({ candidates, onDelete }: CandidatesTableProps) {
+export function CandidatesTable({ 
+  candidates, 
+  onDelete, 
+  selectedIds = [], 
+  onSelectionChange,
+  onSkillClick
+}: CandidatesTableProps) {
+  const toggleAll = () => {
+    if (!onSelectionChange) return;
+    if (selectedIds.length === candidates.length) {
+      onSelectionChange([]);
+    } else {
+      onSelectionChange(candidates.map(c => c.id));
+    }
+  };
+
+  const toggleOne = (id: string) => {
+    if (!onSelectionChange) return;
+    if (selectedIds.includes(id)) {
+      onSelectionChange(selectedIds.filter(i => i !== id));
+    } else {
+      onSelectionChange([...selectedIds, id]);
+    }
+  };
   if (candidates.length === 0) {
     return (
       <Card className="bg-card border-border">
@@ -67,6 +94,12 @@ export function CandidatesTable({ candidates, onDelete }: CandidatesTableProps) 
         <Table>
           <TableHeader>
             <TableRow className="border-border hover:bg-transparent">
+              <TableHead className="w-10">
+                <Checkbox 
+                  checked={candidates.length > 0 && selectedIds.length === candidates.length}
+                  onCheckedChange={toggleAll}
+                />
+              </TableHead>
               <TableHead className="text-muted-foreground">Name</TableHead>
               <TableHead className="text-muted-foreground">Email</TableHead>
               <TableHead className="text-muted-foreground">Current Role</TableHead>
@@ -81,8 +114,14 @@ export function CandidatesTable({ candidates, onDelete }: CandidatesTableProps) 
             {candidates.map((candidate) => (
               <TableRow
                 key={candidate.id}
-                className="border-border hover:bg-muted/50 transition-colors"
+                className={`border-border transition-colors ${selectedIds.includes(candidate.id) ? 'bg-primary/5 hover:bg-primary/10' : 'hover:bg-muted/50'}`}
               >
+                <TableCell>
+                  <Checkbox 
+                    checked={selectedIds.includes(candidate.id)}
+                    onCheckedChange={() => toggleOne(candidate.id)}
+                  />
+                </TableCell>
                 <TableCell className="font-medium text-foreground">
                   {candidate.firstName} {candidate.lastName}
                 </TableCell>
@@ -118,7 +157,8 @@ export function CandidatesTable({ candidates, onDelete }: CandidatesTableProps) 
                     {candidate.skills?.slice(0, 2).map((skill: any, i) => (
                       <span
                         key={i}
-                        className="px-2 py-1 text-xs bg-accent/10 text-accent rounded"
+                        className="px-2 py-1 text-xs bg-accent/10 text-accent rounded cursor-pointer hover:bg-accent/20"
+                        onClick={() => onSkillClick?.(typeof skill === 'string' ? skill : skill.name)}
                       >
                         {typeof skill === 'string' ? skill : skill.name}
                       </span>

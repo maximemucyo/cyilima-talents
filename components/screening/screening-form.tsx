@@ -21,13 +21,29 @@ import { Loader2, AlertCircle } from 'lucide-react';
 
 interface ScreeningFormProps {
   jobs: Array<{ id: string; title: string }>;
-  candidates: Array<{ id: string; firstName: string; lastName: string; email: string }>;
+  candidates: Array<{ 
+    id: string; 
+    firstName: string; 
+    lastName: string; 
+    email: string;
+    location?: string;
+    isRwandaBased?: boolean;
+    country?: string;
+    skills: any[];
+    yearsExperience?: number;
+  }>;
 }
 
 export function ScreeningForm({ jobs, candidates }: ScreeningFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [locationFilter, setLocationFilter] = useState('all');
+  const [expFilter, setExpFilter] = useState('all');
+  const [skillsFilter, setSkillsFilter] = useState<string[]>([]);
 
   const {
     control,
@@ -45,6 +61,41 @@ export function ScreeningForm({ jobs, candidates }: ScreeningFormProps) {
   const applicantIds = watch('applicantIds') || [];
   const selectedJobId = watch('jobId');
 
+  // Filtering Logic
+  const filteredCandidates = candidates.filter((c) => {
+    const matchesSearch = [c.firstName, c.lastName, c.email]
+      .join(' ')
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    
+    const isRwanda = c.isRwandaBased || 
+                    c.country?.toLowerCase() === 'rwanda' || 
+                    c.location?.toLowerCase().includes('rwanda') ||
+                    c.location?.toLowerCase().includes('kigali');
+    
+    const matchesLocation = locationFilter === 'all' || 
+                           (locationFilter === 'rwanda' && isRwanda) ||
+                           (locationFilter === 'intl' && !isRwanda);
+
+    const candidateSkills = (c.skills || []).map((s: any) => 
+      (typeof s === 'string' ? s : s.name).toLowerCase()
+    );
+    const matchesSkills = skillsFilter.length === 0 || 
+                         skillsFilter.some(s => candidateSkills.some(cs => cs.includes(s.toLowerCase())));
+
+    const years = c.yearsExperience || 0;
+    const matchesExp = expFilter === 'all' ||
+                      (expFilter === 'junior' && years <= 2) ||
+                      (expFilter === 'mid' && years > 2 && years <= 5) ||
+                      (expFilter === 'senior' && years > 5);
+
+    return matchesSearch && matchesLocation && matchesSkills && matchesExp;
+  });
+
+  const availableSkills = Array.from(new Set(
+    candidates.flatMap(c => (c.skills || []).map((s: any) => typeof s === 'string' ? s : s.name))
+  )).sort();
+
   const toggleCandidate = (candidateId: string) => {
     const currentIds = [...applicantIds];
     const index = currentIds.indexOf(candidateId);
@@ -58,11 +109,17 @@ export function ScreeningForm({ jobs, candidates }: ScreeningFormProps) {
     setValue('applicantIds', currentIds, { shouldValidate: true });
   };
 
-  const toggleAllCandidates = () => {
-    if (applicantIds.length === candidates.length) {
-      setValue('applicantIds', [], { shouldValidate: true });
+  const toggleAllFiltered = () => {
+    const filteredIds = filteredCandidates.map(c => c.id);
+    const allFilteredSelected = filteredIds.every(id => applicantIds.includes(id));
+
+    if (allFilteredSelected) {
+      // Remove all filtered ones
+      setValue('applicantIds', applicantIds.filter(id => !filteredIds.includes(id)), { shouldValidate: true });
     } else {
-      setValue('applicantIds', candidates.map((c) => c.id), { shouldValidate: true });
+      // Add all filtered ones (avoid duplicates)
+      const newSelection = Array.from(new Set([...applicantIds, ...filteredIds]));
+      setValue('applicantIds', newSelection, { shouldValidate: true });
     }
   };
 
@@ -147,42 +204,129 @@ export function ScreeningForm({ jobs, candidates }: ScreeningFormProps) {
 
       {/* Candidate Selection */}
       <Card className="bg-card border-border">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-foreground">Select Candidates</CardTitle>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={toggleAllCandidates}
-            className="text-accent hover:bg-accent/10"
-          >
-            {applicantIds.length === candidates.length ? 'Deselect All' : 'Select All'}
-          </Button>
+        <CardHeader className="space-y-4">
+          <div className="flex flex-row items-center justify-between">
+            <CardTitle className="text-foreground">Select Candidates</CardTitle>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={toggleAllFiltered}
+              className="text-accent hover:bg-accent/10"
+            >
+              {filteredCandidates.length > 0 && filteredCandidates.every(c => applicantIds.includes(c.id)) 
+                ? 'Deselect All Filtered' 
+                : `Select All Filtered (${filteredCandidates.length})`}
+            </Button>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">🔍</span>
+              <input 
+                className="w-full bg-muted border-border text-foreground rounded-md pl-9 pr-3 py-2 text-sm focus:ring-1 focus:ring-primary outline-none"
+                placeholder="Search candidates..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            
+            <div className="flex flex-wrap gap-2">
+              <select 
+                className="bg-muted border-border text-foreground rounded-md px-3 py-1 text-xs focus:ring-1 focus:ring-primary outline-none"
+                value={locationFilter}
+                onChange={(e) => setLocationFilter(e.target.value)}
+              >
+                <option value="all">All Locations</option>
+                <option value="rwanda">Rwanda</option>
+                <option value="intl">International</option>
+              </select>
+
+              <select 
+                className="bg-muted border-border text-foreground rounded-md px-3 py-1 text-xs focus:ring-1 focus:ring-primary outline-none"
+                value={expFilter}
+                onChange={(e) => setExpFilter(e.target.value)}
+              >
+                <option value="all">All Experience</option>
+                <option value="junior">Junior (0-2y)</option>
+                <option value="mid">Mid (3-5y)</option>
+                <option value="senior">Senior (5y+)</option>
+              </select>
+
+              <select 
+                className="bg-muted border-border text-foreground rounded-md px-3 py-1 text-xs focus:ring-1 focus:ring-primary outline-none max-w-[120px]"
+                value=""
+                onChange={(e) => {
+                  if (e.target.value && !skillsFilter.includes(e.target.value)) {
+                    setSkillsFilter(prev => [...prev, e.target.value]);
+                  }
+                }}
+              >
+                <option value="" disabled>Add Skill...</option>
+                {availableSkills.filter(s => !skillsFilter.includes(s)).map(skill => (
+                  <option key={skill} value={skill}>{skill}</option>
+                ))}
+              </select>
+            </div>
+
+            {skillsFilter.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {skillsFilter.map(s => (
+                  <span key={s} className="px-2 py-0.5 bg-primary/10 text-primary border border-primary/30 rounded text-[10px] flex items-center gap-1">
+                    {s}
+                    <span className="cursor-pointer font-bold" onClick={() => setSkillsFilter(prev => prev.filter(sk => sk !== s))}>×</span>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {candidates.map((candidate) => (
-              <div
-                key={candidate.id}
-                className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
-              >
-                <Checkbox
-                  id={candidate.id}
-                  checked={applicantIds.includes(candidate.id)}
-                  onCheckedChange={() => toggleCandidate(candidate.id)}
-                  className="mt-1"
-                />
-                <label
-                  htmlFor={candidate.id}
-                  className="flex-1 cursor-pointer"
-                >
-                  <div className="font-medium text-foreground">
-                    {candidate.firstName} {candidate.lastName}
-                  </div>
-                  <div className="text-sm text-muted-foreground">{candidate.email}</div>
-                </label>
+          <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
+            {filteredCandidates.length === 0 ? (
+              <div className="py-8 text-center text-muted-foreground text-sm">
+                No candidates match your filters
               </div>
-            ))}
+            ) : (
+              filteredCandidates.map((candidate) => (
+                <div
+                  key={candidate.id}
+                  className={`flex items-start gap-3 p-2 rounded-lg transition-colors border ${
+                    applicantIds.includes(candidate.id) 
+                      ? 'bg-primary/5 border-primary/20' 
+                      : 'hover:bg-muted/50 border-transparent'
+                  }`}
+                >
+                  <Checkbox
+                    id={candidate.id}
+                    checked={applicantIds.includes(candidate.id)}
+                    onCheckedChange={() => toggleCandidate(candidate.id)}
+                    className="mt-1"
+                  />
+                  <label
+                    htmlFor={candidate.id}
+                    className="flex-1 cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="font-medium text-foreground text-sm">
+                        {candidate.firstName} {candidate.lastName}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground">
+                        {candidate.yearsExperience || 0}y | {candidate.location || 'Unknown'}
+                      </div>
+                    </div>
+                    <div className="text-xs text-muted-foreground">{candidate.email}</div>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {candidate.skills?.slice(0, 3).map((s: any, i: number) => (
+                        <span key={i} className="px-1.5 py-0.5 bg-accent/5 text-[9px] rounded text-accent/70">
+                          {typeof s === 'string' ? s : s.name}
+                        </span>
+                      ))}
+                    </div>
+                  </label>
+                </div>
+              ))
+            )}
           </div>
 
           {errors.applicantIds && (
