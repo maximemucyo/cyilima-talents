@@ -10,6 +10,7 @@ const dbConnect = require('../lib/db').default;
 const Job = require('../lib/models/Job').default;
 const Candidate = require('../lib/models/Candidate').default;
 const User = require('../lib/models/User').default;
+const Screening = require('../lib/models/Screening').default;
 const bcrypt = require('bcryptjs');
 
 async function seed() {
@@ -20,6 +21,7 @@ async function seed() {
     console.log('Clearing existing data...');
     await Job.deleteMany({});
     await Candidate.deleteMany({});
+    await Screening.deleteMany({});
     await User.deleteMany({ email: { $ne: 'admin@umurava.rw' } });
 
     console.log('Seeding jobs...');

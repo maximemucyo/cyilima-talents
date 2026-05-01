@@ -8,7 +8,7 @@ import { screenCandidates } from '@/lib/services/ai-service';
 export async function POST(request: Request) {
   try {
     await dbConnect();
-    const { jobId, applicantIds } = await request.json();
+    const { jobId, applicantIds, preferredModel } = await request.json();
 
     if (!jobId || !applicantIds || !applicantIds.length) {
       return NextResponse.json({ success: false, error: 'jobId and applicantIds are required' }, { status: 400 });
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     }
 
     // Call Gemini API
-    const evaluations = await screenCandidates(job, candidates);
+    const evaluations = await screenCandidates(job, candidates, preferredModel);
 
     // Save Results
     screening.results = evaluations;

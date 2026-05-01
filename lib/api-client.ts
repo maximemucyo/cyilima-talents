@@ -107,9 +107,12 @@ export const candidatesApi = {
       method: 'DELETE',
     }),
 
-  bulkUpload: (file: File) => {
+  bulkUpload: (file: File, preferredModel?: string) => {
     const formData = new FormData();
     formData.append('file', file);
+    if (preferredModel) {
+      formData.append('preferredModel', preferredModel);
+    }
 
     return fetch(`${API_BASE_URL}/candidates/bulk-upload`, {
       method: 'POST',

@@ -70,7 +70,7 @@ export function CandidateProfile({
                   {firstName} {lastName}
                 </h1>
                 {currentRole && (
-                  <Badge className="bg-accent/10 text-accent border-0">
+                  <Badge className="bg-primary/10 text-primary border-0">
                     {currentRole}
                   </Badge>
                 )}
@@ -114,15 +114,15 @@ export function CandidateProfile({
           {/* Contact Info */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-4 border-t border-border">
             <div className="flex items-center gap-2 text-sm">
-              <Mail className="h-4 w-4 text-accent" />
-              <a href={`mailto:${email}`} className="text-accent hover:underline">
+              <Mail className="h-4 w-4 text-primary" />
+              <a href={`mailto:${email}`} className="text-primary hover:underline">
                 {email}
               </a>
             </div>
             {phone && (
               <div className="flex items-center gap-2 text-sm">
-                <Phone className="h-4 w-4 text-accent" />
-                <a href={`tel:${phone}`} className="text-accent hover:underline">
+                <Phone className="h-4 w-4 text-primary" />
+                <a href={`tel:${phone}`} className="text-primary hover:underline">
                   {phone}
                 </a>
               </div>
@@ -164,7 +164,7 @@ export function CandidateProfile({
             <Card className="bg-card border-border">
               <CardHeader>
                 <CardTitle className="text-foreground flex items-center gap-2">
-                  <Briefcase className="h-5 w-5 text-accent" />
+                  <Briefcase className="h-5 w-5 text-primary" />
                   Experience
                 </CardTitle>
               </CardHeader>
@@ -177,7 +177,7 @@ export function CandidateProfile({
                     <h4 className="font-semibold text-foreground mb-1">
                       {exp.position}
                     </h4>
-                    <p className="text-sm text-accent mb-2">{exp.company}</p>
+                    <p className="text-sm text-primary mb-2">{exp.company}</p>
                     {(exp.startDate || exp.endDate) && (
                       <p className="text-xs text-muted-foreground">
                         {exp.startDate} {exp.endDate ? `- ${exp.endDate}` : '- Present'}
@@ -194,7 +194,7 @@ export function CandidateProfile({
             <Card className="bg-card border-border">
               <CardHeader>
                 <CardTitle className="text-foreground flex items-center gap-2">
-                  <GraduationCap className="h-5 w-5 text-accent" />
+                  <GraduationCap className="h-5 w-5 text-primary" />
                   Education
                 </CardTitle>
               </CardHeader>
@@ -225,7 +225,7 @@ export function CandidateProfile({
               <CardContent>
                 <div className="flex flex-wrap gap-2">
                   {skills?.map((skill: any, i) => (
-                    <Badge key={i} className="bg-accent/10 text-accent border-0">
+                    <Badge key={i} className="bg-primary/10 text-primary border-0">
                       {typeof skill === 'string' ? skill : skill.name}
                     </Badge>
                   ))}
@@ -264,7 +264,7 @@ export function CandidateProfile({
                     href={portfolioUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-accent hover:underline text-sm"
+                    className="flex items-center gap-2 text-primary hover:underline text-sm"
                   >
                     <LinkIcon className="h-4 w-4" />
                     Portfolio
@@ -275,7 +275,7 @@ export function CandidateProfile({
                     href={linkedinUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-accent hover:underline text-sm"
+                    className="flex items-center gap-2 text-primary hover:underline text-sm"
                   >
                     <LinkIcon className="h-4 w-4" />
                     LinkedIn
@@ -286,7 +286,7 @@ export function CandidateProfile({
                     href={githubUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-accent hover:underline text-sm"
+                    className="flex items-center gap-2 text-primary hover:underline text-sm"
                   >
                     <LinkIcon className="h-4 w-4" />
                     GitHub

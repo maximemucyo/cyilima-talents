@@ -1,0 +1,6 @@
+firstName,lastName,email,phone,location,skills,yearsExperience,currentRole,cvUrl
+Jean Bosco,Mutabazi,bosco.mutabazi@gmail.com,+250788123456,Kigali,"Node.js,React,PostgreSQL",5,Backend Engineer,https://example.com/cvs/mutabazi.pdf
+Marie Claire,Umuhoza,marie.umuhoza@outlook.com,+250788654321,Gisenyi,"React,TypeScript,Tailwind CSS",4,Senior Frontend Dev,https://example.com/cvs/umuhoza.pdf
+Eric,Nshimiyimana,eric.n@tech.com,+250788999888,Muhanga,"Python,Scikit-Learn,FastAPI",1,Data Science Intern,https://example.com/cvs/eric.pdf
+Alice,Uwase,alice.u@company.rw,+250788111222,Kigali,"Project Management,Agile,Jira",6,Project Manager,https://example.com/cvs/alice.pdf
+Claude,Gasana,claude.g@global.com,+254711222333,Nairobi,"AWS,Docker,Kubernetes",8,DevOps Engineer,https://example.com/cvs/claude.pdf

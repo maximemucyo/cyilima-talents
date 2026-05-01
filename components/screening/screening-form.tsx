@@ -128,9 +128,11 @@ export function ScreeningForm({ jobs, candidates }: ScreeningFormProps) {
     setError(null);
 
     try {
+      const preferredModel = typeof window !== 'undefined' ? localStorage.getItem('preferredModel') : null;
       const response = await screeningApi.create({
         jobId: data.jobId,
         applicantIds: data.applicantIds,
+        preferredModel: preferredModel || undefined,
       });
 
       if (!response.success) {
@@ -318,7 +320,7 @@ export function ScreeningForm({ jobs, candidates }: ScreeningFormProps) {
                     <div className="text-xs text-muted-foreground">{candidate.email}</div>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {candidate.skills?.slice(0, 3).map((s: any, i: number) => (
-                        <span key={i} className="px-1.5 py-0.5 bg-accent/5 text-[9px] rounded text-accent/70">
+                        <span key={i} className="px-1.5 py-0.5 bg-primary/10 text-[9px] rounded text-primary font-medium">
                           {typeof s === 'string' ? s : s.name}
                         </span>
                       ))}

@@ -18,8 +18,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 import { useSession, signOut } from 'next-auth/react';
-
 import Link from 'next/link';
+import { ModeToggle } from '@/components/layout/mode-toggle';
 
 export function Header() {
   const { data: session } = useSession();
@@ -39,6 +39,7 @@ export function Header() {
 
       {/* Actions */}
       <div className="flex items-center gap-4 ml-6">
+        <ModeToggle />
         {/* Notifications */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

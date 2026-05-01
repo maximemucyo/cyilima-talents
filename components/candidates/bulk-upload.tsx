@@ -143,9 +143,14 @@ export function BulkUploadComponent({ onSuccess }: BulkUploadProps) {
         setUploadProgress((prev) => (prev < 90 ? prev + 5 : 90));
       }, 500);
 
+      const preferredModel = typeof window !== 'undefined' ? localStorage.getItem('preferredModel') : null;
+      
       // Create FormData with all files
       const formData = new FormData();
       files.forEach(f => formData.append('file', f));
+      if (preferredModel) {
+        formData.append('preferredModel', preferredModel);
+      }
 
       const response = await fetch('/api/candidates/bulk-upload', {
         method: 'POST',
@@ -191,11 +196,13 @@ export function BulkUploadComponent({ onSuccess }: BulkUploadProps) {
         setUploadProgress((prev) => (prev < 90 ? prev + 10 : 90));
       }, 200);
 
+      const preferredModel = typeof window !== 'undefined' ? localStorage.getItem('preferredModel') : null;
+      
       // This would call an API endpoint to process URLs
       const response = await fetch('/api/candidates/bulk-upload-urls', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cvUrls: urlList }),
+        body: JSON.stringify({ cvUrls: urlList, preferredModel: preferredModel || undefined }),
       }).then((res) => res.json());
 
       clearInterval(progressInterval);

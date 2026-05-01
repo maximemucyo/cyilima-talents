@@ -16,6 +16,7 @@ export const metadata: Metadata = {
 }
 
 import { AuthProvider } from '@/components/providers/session-provider'
+import { ThemeProvider } from '@/components/providers/theme-provider'
 import { Toaster } from 'sonner'
 
 export default function RootLayout({
@@ -24,12 +25,19 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
       <body className="font-sans antialiased bg-background text-foreground">
-        <AuthProvider>
-          {children}
-          <Toaster position="top-right" />
-        </AuthProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthProvider>
+            {children}
+            <Toaster position="top-right" />
+          </AuthProvider>
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>

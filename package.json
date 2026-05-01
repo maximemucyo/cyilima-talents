@@ -39,6 +39,7 @@
     "@radix-ui/react-toggle-group": "1.1.11",
     "@radix-ui/react-tooltip": "1.2.8",
     "@vercel/analytics": "1.6.1",
+    "adm-zip": "^0.5.17",
     "autoprefixer": "^10.4.20",
     "bcryptjs": "^3.0.3",
     "canvas": "^3.2.3",
@@ -50,6 +51,7 @@
     "embla-carousel-react": "8.6.0",
     "framer-motion": "^12.38.0",
     "input-otp": "1.4.2",
+    "jszip": "^3.10.1",
     "lucide-react": "^0.564.0",
     "mongoose": "^9.4.1",
     "next": "^16.2.0",
@@ -71,6 +73,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.0",
     "@types/bcryptjs": "^2.4.6",
+    "@types/jszip": "^3.4.0",
     "@types/node": "^22",
     "@types/pdf-parse": "^1.1.5",
     "@types/react": "19.2.14",

@@ -9,6 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 
+import { ModeToggle } from '@/components/layout/mode-toggle';
+
 export default function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -43,29 +45,32 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-950 p-4">
-      <Card className="w-full max-w-md bg-slate-900 border-slate-800">
+    <div className="relative flex items-center justify-center min-h-screen bg-background p-4">
+      <div className="absolute top-4 right-4">
+        <ModeToggle />
+      </div>
+      <Card className="w-full max-w-md bg-card border-border">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center text-white">Create Account</CardTitle>
-          <CardDescription className="text-center text-slate-400">
+          <CardTitle className="text-2xl font-bold text-center text-foreground">Create Account</CardTitle>
+          <CardDescription className="text-center text-muted-foreground">
             Join the Cyilima Talents Rwandan Platform (Est. 2026)
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-slate-300">Full Name</Label>
+              <Label htmlFor="name" className="text-foreground">Full Name</Label>
               <Input 
                 id="name" 
                 placeholder="Jean Bosco Mutabazi" 
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required 
-                className="bg-slate-800 border-slate-700 text-white"
+                className="bg-muted border-input text-foreground"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-slate-300">Email</Label>
+              <Label htmlFor="email" className="text-foreground">Email</Label>
               <Input 
                 id="email" 
                 type="email" 
@@ -73,29 +78,29 @@ export default function RegisterPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required 
-                className="bg-slate-800 border-slate-700 text-white"
+                className="bg-muted border-input text-foreground"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" title="April 2026 Security" className="text-slate-300">Password</Label>
+              <Label htmlFor="password" title="April 2026 Security" className="text-foreground">Password</Label>
               <Input 
                 id="password" 
                 type="password" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required 
-                className="bg-slate-800 border-slate-700 text-white"
+                className="bg-muted border-input text-foreground"
               />
             </div>
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={isLoading}>
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Creating Account...' : 'Register'}
             </Button>
           </form>
         </CardContent>
         <CardFooter>
-          <div className="text-sm text-center w-full text-slate-400">
+          <div className="text-sm text-center w-full text-muted-foreground">
             Already have an account?{' '}
-            <Link href="/login" className="text-blue-500 hover:underline">
+            <Link href="/login" className="text-primary hover:underline">
               Sign In
             </Link>
           </div>

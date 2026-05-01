@@ -20,6 +20,7 @@ export async function POST(request: Request) {
     await dbConnect();
     const body = await request.json();
     const urls = body.urls || body.cvUrls || body.linkedinUrls;
+    const preferredModel = body.preferredModel;
 
     if (!urls || urls.length === 0) {
       return NextResponse.json({ success: false, error: 'URLs are required' }, { status: 400 });
@@ -68,7 +69,7 @@ export async function POST(request: Request) {
             }
 
             if (parsedText) {
-                const aiProfile = await parseResumeToProfile(parsedText);
+                const aiProfile = await parseResumeToProfile(parsedText, preferredModel);
                 profile = { ...profile, ...aiProfile };
             }
 

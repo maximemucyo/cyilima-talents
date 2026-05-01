@@ -238,6 +238,41 @@ export default function SettingsPage() {
           <TabsContent value="advanced" className="space-y-4 mt-6">
             <Card className="bg-card border-border">
               <CardHeader>
+                <CardTitle className="text-foreground">AI Configuration</CardTitle>
+                <CardDescription className="text-muted-foreground">
+                  Choose your preferred Gemini model and fallback strategy
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="aiModel" className="text-foreground">
+                    Primary AI Model
+                  </Label>
+                  <Select 
+                    defaultValue={typeof window !== 'undefined' ? localStorage.getItem('preferredModel') || 'gemini-3.1-flash-lite-preview' : 'gemini-3.1-flash-lite-preview'}
+                    onValueChange={(val) => {
+                      localStorage.setItem('preferredModel', val);
+                      import('sonner').then(({ toast }) => toast.success(`Primary model set to ${val}`));
+                    }}
+                  >
+                    <SelectTrigger className="bg-muted border-border text-foreground">
+                      <SelectValue placeholder="Select model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="gemini-3.1-flash-lite-preview">Gemini 3.1 Flash Lite (Fastest)</SelectItem>
+                      <SelectItem value="gemini-3-flash-preview">Gemini 3 Flash (Balanced)</SelectItem>
+                      <SelectItem value="gemini-2.5-flash-preview">Gemini 2.5 Flash (Most Stable)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Note: If the primary model is unavailable (503), the system will intelligently switch to other models automatically.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card border-border">
+              <CardHeader>
                 <CardTitle className="text-foreground">API Settings</CardTitle>
                 <CardDescription className="text-muted-foreground">
                   Manage your API keys and integrations

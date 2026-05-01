@@ -2,13 +2,52 @@ import { GoogleGenAI } from '@google/genai';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
+const MODELS = [
+  "gemini-3.1-flash-lite-preview",
+  "gemini-3-flash-preview",
+  "gemini-2.5-flash-preview"
+];
+
+async function generateWithFallback(contents: string, preferredModel?: string) {
+  const modelsToTry = preferredModel 
+    ? [preferredModel, ...MODELS.filter(m => m !== preferredModel)]
+    : MODELS;
+
+  let lastError: any = null;
+
+  for (const model of modelsToTry) {
+    try {
+      console.log(`Gemini: Attempting with model: ${model}`);
+      const result = await ai.models.generateContent({
+        model: model,
+        contents: contents
+      });
+      return result;
+    } catch (error: any) {
+      lastError = error;
+      // Check if it's a 503 error (Unavailable)
+      const isUnavailable = error?.message?.includes('503') || error?.status === 'UNAVAILABLE' || error?.message?.includes('high demand');
+      
+      if (isUnavailable) {
+        console.warn(`Gemini: Model ${model} is unavailable (high demand). Trying next fallback...`);
+        continue;
+      }
+      
+      // For other errors, rethrow immediately
+      throw error;
+    }
+  }
+
+  throw lastError;
+}
+
 /**
  * Intentional Prompt Engineering Strategy:
  * 1. Persona: HR Recruiter API (High precision)
  * 2. Format: Strict JSON Schema adherence
  * 3. Context: Limited text length to prevent LLM hallucination on very long PDFs
  */
-export async function parseResumeToProfile(resumeText: string) {
+export async function parseResumeToProfile(resumeText: string, preferredModel?: string) {
   const prompt = `You are an expert HR Recruiter specializing in data extraction.
 TASK: Parse the following raw resume text into a structured JSON profile.
 STRICTNESS: Follow the schema EXACTLY. If data is missing, use null or an empty array as appropriate.
@@ -39,11 +78,7 @@ Return ONLY valid JSON.
 
   try {
     console.log(`Gemini: Parsing resume text (${resumeText.length} chars)`);
-    const result = await ai.models.generateContent({
-      model: "gemini-3.1-flash-lite-preview",
-      contents: prompt
-    });
-    const response = result;
+    const response = await generateWithFallback(prompt, preferredModel);
     let rawText = response.text || "{}";
     console.log(`Gemini: Received response (${rawText.length} chars)`);
     rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
@@ -54,7 +89,7 @@ Return ONLY valid JSON.
   }
 }
 
-export async function screenCandidates(job: any, candidates: any[]) {
+export async function screenCandidates(job: any, candidates: any[], preferredModel?: string) {
   const candidatesData = candidates.map(c => ({
     id: c._id ? c._id.toString() : c.id,
     name: `${c.firstName} ${c.lastName}`,
@@ -97,11 +132,7 @@ Rules:
 
   try {
     console.log(`Gemini: Screening ${candidates.length} candidates against job: ${job.title}`);
-    const result = await ai.models.generateContent({
-      model: "gemini-3.1-flash-lite-preview",
-      contents: prompt
-    });
-    const response = result;
+    const response = await generateWithFallback(prompt, preferredModel);
     let rawText = response.text || "[]";
     console.log(`Gemini: Received response (${rawText.length} chars)`);
     rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();

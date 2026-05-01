@@ -157,7 +157,7 @@ export function CandidatesTable({
                     {candidate.skills?.slice(0, 2).map((skill: any, i) => (
                       <span
                         key={i}
-                        className="px-2 py-1 text-xs bg-accent/10 text-accent rounded cursor-pointer hover:bg-accent/20"
+                        className="px-2 py-1 text-xs bg-primary/10 text-primary rounded cursor-pointer hover:bg-primary/20"
                         onClick={() => onSkillClick?.(typeof skill === 'string' ? skill : skill.name)}
                       >
                         {typeof skill === 'string' ? skill : skill.name}

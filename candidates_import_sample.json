@@ -1,0 +1,35 @@
+[
+  {
+    "firstName": "Jean Bosco",
+    "lastName": "Mutabazi",
+    "email": "bosco.mutabazi@gmail.com",
+    "phone": "+250788123456",
+    "location": "Kigali, Rwanda",
+    "skills": ["Node.js", "React", "PostgreSQL"],
+    "yearsExperience": 5,
+    "currentRole": "Backend Engineer",
+    "cvUrl": "https://example.com/cvs/mutabazi.pdf"
+  },
+  {
+    "firstName": "Marie Claire",
+    "lastName": "Umuhoza",
+    "email": "marie.umuhoza@outlook.com",
+    "phone": "+250788654321",
+    "location": "Gisenyi, Rwanda",
+    "skills": ["React", "TypeScript", "Tailwind CSS"],
+    "yearsExperience": 4,
+    "currentRole": "Senior Frontend Dev",
+    "cvUrl": "https://example.com/cvs/umuhoza.pdf"
+  },
+  {
+    "firstName": "Eric",
+    "lastName": "Nshimiyimana",
+    "email": "eric.n@tech.com",
+    "phone": "+250788999888",
+    "location": "Muhanga, Rwanda",
+    "skills": ["Python", "Scikit-Learn", "FastAPI"],
+    "yearsExperience": 1,
+    "currentRole": "Data Science Intern",
+    "cvUrl": "https://example.com/cvs/eric.pdf"
+  }
+]

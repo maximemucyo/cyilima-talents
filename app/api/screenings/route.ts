@@ -34,7 +34,7 @@ export async function POST(request: Request) {
   try {
     await dbConnect();
     const body = await request.json();
-    const { jobId, applicantIds } = body;
+    const { jobId, applicantIds, preferredModel } = body;
 
     if (!jobId || !applicantIds || applicantIds.length === 0) {
         return NextResponse.json({ success: false, error: 'Missing jobId or applicantIds' }, { status: 400 });
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
     if (candidates.length === 0) return NextResponse.json({ success: false, error: 'No candidates found' }, { status: 404 });
 
     // 2) Run Gemini Screening
-    const rawResults = await screenCandidates(job, candidates);
+    const rawResults = await screenCandidates(job, candidates, preferredModel);
 
     // 3) Map Results to Schema
     const processedResults = rawResults.map((res: any) => {
